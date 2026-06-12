@@ -3,7 +3,7 @@
 #
 # Unless you are indeed releasing a binary, use Debug or RelWithDebInfo.
 
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.16...3.25)
 set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 
 project(Hypersomnia)
