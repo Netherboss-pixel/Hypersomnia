@@ -353,7 +353,7 @@ namespace test_flavours {
 			tool.pe_absorption.hp = 1.0f;
 			tool.pe_absorption.cp = 20.f;
 			tool.glow_color = rgba::faction_color;
-			tool.movement_speed_mult = 0.92f;
+			tool.movement_speed_mult = 0.95f;
 			meta.set(tool);
 		}
 

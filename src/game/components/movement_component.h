@@ -125,7 +125,7 @@ namespace invariants {
 		vec2 applied_force_offset;
 		vec2 input_acceleration_axes;
 
-		real32 acceleration_length = -1.f;
+		real32 acceleration_length = 3200.f;
 		real32 standard_linear_damping = 0.f;
 		real32 non_braking_damping = 0.f;
 		real32 braking_damping = 0.f;
@@ -142,7 +142,7 @@ namespace invariants {
 		real32 dash_cooldown_ms = 1000.f;
 		real32 dash_cooldown_mult_after_transfer = 0.2f;
 
-		real32 dash_impulse = 1163.f;
+		real32 dash_impulse = 1000.f;
 		real32 dash_inert_ms = 400.f;
 
 		particle_effect_input dash_particles;
