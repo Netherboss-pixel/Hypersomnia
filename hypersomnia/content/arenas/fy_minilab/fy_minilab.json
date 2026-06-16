@@ -1879,7 +1879,7 @@
         {
             "id": "bot_waypoint_patrol (8)",
             "type": "bot_waypoint_patrol",
-            "faction": "RESISTANCE",
+            "faction": "ATLANTIS",
             "letter": "B",
             "pos": [2043.0, 741.0],
             "rotation": -450.0
@@ -1887,7 +1887,7 @@
         {
             "id": "bot_waypoint_patrol (9)",
             "type": "bot_waypoint_patrol",
-            "faction": "RESISTANCE",
+            "faction": "ATLANTIS",
             "letter": "B",
             "pos": [2188.0, -661.0],
             "rotation": -284.13604736328125
@@ -1895,7 +1895,7 @@
         {
             "id": "bot_waypoint_patrol (10)",
             "type": "bot_waypoint_patrol",
-            "faction": "RESISTANCE",
+            "faction": "ATLANTIS",
             "letter": "B",
             "pos": [2767.0, -687.0],
             "rotation": -241.169921875
@@ -1903,7 +1903,7 @@
         {
             "id": "bot_waypoint_patrol (11)",
             "type": "bot_waypoint_patrol",
-            "faction": "RESISTANCE",
+            "faction": "ATLANTIS",
             "letter": "B",
             "pos": [2694.0, -1328.0],
             "rotation": -180.0
@@ -1911,7 +1911,7 @@
         {
             "id": "bot_waypoint_patrol (12)",
             "type": "bot_waypoint_patrol",
-            "faction": "RESISTANCE",
+            "faction": "ATLANTIS",
             "letter": "B",
             "pos": [2679.0, 1299.0],
             "rotation": -180.0
@@ -1919,7 +1919,7 @@
         {
             "id": "bot_waypoint_patrol (13)",
             "type": "bot_waypoint_patrol",
-            "faction": "RESISTANCE",
+            "faction": "ATLANTIS",
             "letter": "B",
             "pos": [2230.0, 1067.0],
             "rotation": -80.73906707763672
@@ -1927,7 +1927,7 @@
         {
             "id": "bot_waypoint_patrol (14)",
             "type": "bot_waypoint_patrol",
-            "faction": "RESISTANCE",
+            "faction": "ATLANTIS",
             "letter": "B",
             "pos": [2634.0, 981.0],
             "rotation": -118.7953872680664
@@ -1935,7 +1935,7 @@
         {
             "id": "bot_waypoint_patrol (15)",
             "type": "bot_waypoint_patrol",
-            "faction": "RESISTANCE",
+            "faction": "ATLANTIS",
             "letter": "B",
             "pos": [2765.0, 623.0],
             "rotation": -133.03173828125
@@ -1967,21 +1967,21 @@
         {
             "id": "bot_waypoint_push",
             "type": "bot_waypoint_push",
-            "faction": "RESISTANCE",
+            "faction": "ATLANTIS",
             "camp": false,
             "pos": [-502.0, 132.0]
         },
         {
             "id": "bot_waypoint_push (1)",
             "type": "bot_waypoint_push",
-            "faction": "RESISTANCE",
+            "faction": "ATLANTIS",
             "camp": false,
             "pos": [-691.0, -554.0]
         },
         {
             "id": "bot_waypoint_push (2)",
             "type": "bot_waypoint_push",
-            "faction": "RESISTANCE",
+            "faction": "ATLANTIS",
             "camp": false,
             "pos": [319.0, 703.0]
         },
@@ -2020,14 +2020,14 @@
         {
             "id": "bot_waypoint_push (7)",
             "type": "bot_waypoint_push",
-            "faction": "RESISTANCE",
+            "faction": "ATLANTIS",
             "camp": false,
             "pos": [548.0, 1339.0]
         },
         {
             "id": "bot_waypoint_push (8)",
             "type": "bot_waypoint_push",
-            "faction": "RESISTANCE",
+            "faction": "ATLANTIS",
             "camp": false,
             "pos": [342.0, -1322.0]
         },

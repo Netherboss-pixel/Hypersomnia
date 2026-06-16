@@ -137,7 +137,15 @@ arena_mode::participating_factions arena_mode::calc_participating_factions(const
 
 	for_each_faction([&](const faction_type t) {
 		if (spawnable[t] && t != output.bombing) {
-			output.defusing = t;
+			if (output.bombing == faction_type::SPECTATOR) {
+				output.bombing = t;
+			}
+			else if (output.defusing == faction_type::SPECTATOR) {
+				output.defusing = t;
+			}
+			else {
+				output.third = t;
+			}
 		}
 	});
 
@@ -218,6 +226,14 @@ void arena_mode::init_spawned(
 	auto access = allocate_new_entity_access();
 
 	handle.dispatch_on_having_all<components::sentience>([&](const auto& typed_handle) {
+		auto& sentience = typed_handle.template get<components::sentience>();
+		sentience.movement_speed_mult = faction_rules.movement_speed_mult;
+		sentience.health_mult = faction_rules.health_mult;
+
+		auto& health = sentience.template get<health_meter_instance>();
+		health.maximum *= sentience.health_mult;
+		health.value = health.maximum;
+
 		if (levelling_enabled(in)) {
 			reset_equipment_for(step, in, player_id, typed_handle);
 		}
@@ -635,7 +651,7 @@ mode_entity_id arena_mode::lookup(const mode_player_id& id) const {
 	return mode_entity_id::dead();
 }
 
-void arena_mode::fill_spawns(const cosmos& cosm, faction_type faction, arena_mode_faction_state& out) {
+void arena_mode::fill_spawns(const cosmos& cosm, faction_type faction, const arena_mode_faction_rules& faction_rules, arena_mode_faction_state& out) {
 	auto& spawns = out.shuffled_spawns;
 	out.current_spawn_index = 0;
 
@@ -645,7 +661,12 @@ void arena_mode::fill_spawns(const cosmos& cosm, faction_type faction, arena_mod
 		spawns.push_back(typed_spawn);
 	};
 
-	for_each_faction_spawn(cosm, faction, adder);
+	if (faction_rules.use_bombsites_as_spawns) {
+		for_each_bombsite_marker(cosm, adder);
+	}
+	else {
+		for_each_faction_spawn(cosm, faction, adder);
+	}
 
 	reshuffle_spawns(cosm, out);
 }
@@ -1168,7 +1189,7 @@ void arena_mode::setup_round(
 	}
 
 	for_each_faction([&](const auto faction) {
-		fill_spawns(cosm, faction, factions[faction]);
+		fill_spawns(cosm, faction, in.rules.factions[faction], factions[faction]);
 	});
 
 	/*
@@ -1183,7 +1204,7 @@ void arena_mode::setup_round(
 	*/
 	::gather_bombsite_mappings(cosm, ai_arena_meta);
 
-	fill_spawns(cosm, faction_type::ANY, ffa_faction);
+	fill_spawns(cosm, faction_type::ANY, arena_mode_faction_rules(), ffa_faction);
 
 	messages::changed_identities_message changed_identities;
 	changed_identities.predictable = params.predictable;
@@ -1901,7 +1922,6 @@ void arena_mode::trigger_match_summary(const input_type in, const const_logic_st
 
 void arena_mode::count_win(const input_type in, const const_logic_step step, const faction_type winner) {
 	const auto p = calc_participating_factions(in);
-	const auto loser = winner == p.defusing ? p.bombing : p.defusing;
 
 	++factions[winner].score;
 	factions[winner].consecutive_losses = 0;
@@ -1909,31 +1929,38 @@ void arena_mode::count_win(const input_type in, const const_logic_step step, con
 	state = arena_mode_state::ROUND_END_DELAY;
 	current_round.last_win = { in.cosm.get_clock(), winner };
 
-	auto& consecutive_losses = factions[loser].consecutive_losses;
-	++consecutive_losses;
-
 	auto winner_award = in.rules.economy.winning_faction_award;
-	auto loser_award = in.rules.economy.losing_faction_award;
+	per_actual_faction<money_type> loser_awards;
 
-	if (consecutive_losses > 1) {
-		loser_award += std::min(
-			consecutive_losses - 1, 
-			in.rules.economy.max_consecutive_loss_bonuses
-		) * in.rules.economy.consecutive_loss_bonus;
-	}
+	p.for_each([&](const faction_type f) {
+		if (f == winner) return;
 
-	if (loser == p.bombing) {
-		if (current_round.bomb_planter.is_set()) {
-			loser_award += in.rules.economy.lost_but_bomb_planted_team_bonus;
-			winner_award += in.rules.economy.defused_team_bonus;
+		auto& consecutive_losses = factions[f].consecutive_losses;
+		++consecutive_losses;
+
+		auto& loser_award = loser_awards[f];
+		loser_award = in.rules.economy.losing_faction_award;
+
+		if (consecutive_losses > 1) {
+			loser_award += std::min(
+				consecutive_losses - 1,
+				in.rules.economy.max_consecutive_loss_bonuses
+			) * in.rules.economy.consecutive_loss_bonus;
 		}
-	}
+
+		if (f == p.bombing) {
+			if (current_round.bomb_planter.is_set()) {
+				loser_award += in.rules.economy.lost_but_bomb_planted_team_bonus;
+				winner_award += in.rules.economy.defused_team_bonus;
+			}
+		}
+	});
 	
 	for (auto& p : players) {
 		const auto& player_id = p.first;
 		const auto faction = p.second.get_faction();
 
-		give_monetary_award(in, player_id, {}, faction == winner ? winner_award : loser_award);
+		give_monetary_award(in, player_id, {}, faction == winner ? winner_award : loser_awards[faction]);
 	}
 
 	if (casual_levels_enabled(in)) {
@@ -1947,7 +1974,8 @@ void arena_mode::count_win(const input_type in, const const_logic_step step, con
 				session.casual_level = std::min(casual_level_cap_v, uint16_t(session.casual_level + 1));
 				session.casual_pve_loss_streak = 0;
 			}
-			else if (faction == loser) {
+			else {
+				/* Faction is a loser. */
 				if (pvp_loss) {
 					if (session.casual_level > 0) {
 						--session.casual_level;
@@ -1962,7 +1990,6 @@ void arena_mode::count_win(const input_type in, const const_logic_step step, con
 						if (session.casual_level > 0) {
 							--session.casual_level;
 						}
-
 						session.casual_pve_loss_streak = 0;
 					}
 				}
@@ -2147,6 +2174,23 @@ void arena_mode::process_win_conditions(const input_type in, const logic_step st
 		standard_victory(in, step, winner);
 	};
 
+	if (in.rules.is_trifaction()) {
+		int conscious_teams = 0;
+		faction_type last_conscious_team = faction_type::SPECTATOR;
+
+		p.for_each([&](const faction_type f) {
+			if (num_players_in(f) > 0 && num_conscious_players_in(cosm, f) > 0) {
+				++conscious_teams;
+				last_conscious_team = f;
+			}
+		});
+
+		if (conscious_teams == 1) {
+			victory_for(last_conscious_team);
+			return;
+		}
+	}
+
 	if (in.rules.has_bomb_mechanics()) {
 		/* Bomb-based win-conditions */
 
@@ -2242,10 +2286,23 @@ void arena_mode::process_win_conditions(const input_type in, const logic_step st
 }
 
 void arena_mode::swap_assigned_factions(const arena_mode::participating_factions& p) {
+	const auto all_factions = p.get_all();
+
 	for (auto& it : players) {
 		auto& player_data = it.second;
 		auto& faction = player_data.session.faction;
-		faction = p.get_opposing(faction);
+
+		if (all_factions.size() <= 2) {
+			faction = p.get_opposing(faction);
+		}
+		else {
+			for (std::size_t i = 0; i < all_factions.size(); ++i) {
+				if (all_factions[i] == faction) {
+					faction = all_factions[(i + 1) % all_factions.size()];
+					break;
+				}
+			}
+		}
 	}
 }
 
@@ -2263,8 +2320,10 @@ void arena_mode::scramble_assigned_factions(const arena_mode::participating_fact
 
 	const auto off = rng.randval(0, 1); 
 
+	const auto all_factions = p.get_all();
+
 	for (std::size_t i = 0; i < ptrs.size(); ++i) {
-		ptrs[i]->session.faction = (i + off) % 2 ? p.defusing : p.bombing;
+		ptrs[i]->session.faction = all_factions[(i + off) % all_factions.size()];
 	}
 }
 
@@ -2622,6 +2681,8 @@ void arena_mode::execute_player_commands(const input_type in, const mode_entropy
 	const bool is_bomb_planted = bomb_planted(in);
 	const auto current_bomb_entity = bomb_entity;
 
+	const auto p = calc_participating_factions(in);
+
 	/*
 		Update team-level AI state once per step per faction
 		before the per-bot loop.
@@ -2657,7 +2718,9 @@ void arena_mode::execute_player_commands(const input_type in, const mode_entropy
 				team_rng,
 				cosm.get_common_significant().navmesh,
 				current_bomb_entity,
-				&_pathfinding_ctx
+				&_pathfinding_ctx,
+				p.bombing,
+				p.defusing
 			);
 		});
 
@@ -2719,7 +2782,9 @@ void arena_mode::execute_player_commands(const input_type in, const mode_entropy
 			in_buy_area,
 			is_freeze_time,
 			bot_index,
-			num_bots
+			num_bots,
+			p.bombing,
+			p.defusing
 		);
 		
 		if (ai_result.item_purchase.has_value()) {
@@ -4220,6 +4285,8 @@ void arena_mode::mode_post_solve(const input_type in, const mode_entropy& entrop
 		}
 	}
 
+	const auto p = calc_participating_factions(in);
+
 	// At the end of mode_post_solve, reset bot sprint/dash flags
 	for (auto& it : only_bot(players)) {
 		post_solve_arena_mode_ai(
@@ -4229,7 +4296,9 @@ void arena_mode::mode_post_solve(const input_type in, const mode_entropy& entrop
 			it.second.controlled_character_id,
 			in.rules.is_ffa(),
 			in.rules.is_gun_game(),
-			is_bomb_planted
+			is_bomb_planted,
+			p.bombing,
+			p.defusing
 		);
 	}
 
@@ -5182,6 +5251,10 @@ bool arena_mode_ruleset::is_ffa() const {
 
 bool arena_mode_ruleset::is_gun_game() const {
 	return std::holds_alternative<gun_game_rules>(subrules);
+}
+
+bool arena_mode_ruleset::is_trifaction() const {
+	return std::holds_alternative<trifaction_rules>(subrules);
 }
 
 bool arena_mode::levelling_enabled(const_input_type in) const {

@@ -607,5 +607,148 @@ namespace test_flavours {
 
 			meta.get<components::sentience>().official_faction = faction_type::RESISTANCE;
 		}
+
+		{
+			auto& meta = get_test_flavour(flavours, test_controlled_characters::ATLANTIS_SOLDIER);
+			meta = get_test_flavour(flavours, test_controlled_characters::METROPOLIS_SOLDIER);
+			meta.get<invariants::text_details>().name = format_enum(test_controlled_characters::ATLANTIS_SOLDIER);
+
+			meta.get<invariants::sentience>().detached_flavours.head = to_entity_flavour_id(test_plain_sprited_bodies::DETACHED_ATLANTIS_HEAD);
+			meta.get<invariants::sentience>().detached_flavours.arm_upper = to_entity_flavour_id(test_plain_sprited_bodies::DETACHED_ATLANTIS_ARM_TOP);
+			meta.get<invariants::sentience>().detached_flavours.arm_lower = to_entity_flavour_id(test_plain_sprited_bodies::DETACHED_ATLANTIS_ARM_BOTTOM);
+			meta.get<invariants::sentience>().detached_head_particles.modifier.color = rgba(192, 0, 0, 255);
+			meta.get<invariants::sentience>().corpse_catch_fire_particles.modifier.color = rgba(192, 0, 0, 255);
+
+			meta.get<invariants::sentience>().lying_corpse_flavour = to_entity_flavour_id(test_plain_sprited_bodies::LYING_CORPSE_ATLANTIS);
+			meta.get<invariants::sentience>().lying_corpse_noarm_flavour = to_entity_flavour_id(test_plain_sprited_bodies::LYING_CORPSE_ATLANTIS_NOARM);
+			meta.get<invariants::sentience>().lying_corpse_noarms_flavour = to_entity_flavour_id(test_plain_sprited_bodies::LYING_CORPSE_ATLANTIS_NOARMS);
+
+			meta.get<invariants::sentience>().corpse_head_image = to_image_id(test_scene_image_id::ATLANTIS_TORSO_CORPSE_HEAD);
+			meta.get<invariants::sentience>().corpse_head_splatter_image = to_image_id(test_scene_image_id::CORPSE_HEAD_SPLATTER);
+			meta.get<invariants::sentience>().corpse_body_splatter_image = to_image_id(test_scene_image_id::CORPSE_BODY_SPLATTER);
+
+
+			{
+				auto& explosive = meta.get<invariants::sentience>().corpse_explosion;
+
+				auto& in = explosive.explosion;
+				in.inner_ring_color = orange;
+				in.outer_ring_color = yellow;
+
+				{
+					auto& c = explosive.cascade[0];
+					c.flavour_id = to_entity_flavour_id(test_explosion_bodies::METROPOLIS_CORPSE_EXPLOSION_CASCADE);
+				}
+			}
+
+			meta.get<invariants::sprite>().image_id = to_image_id(test_scene_image_id::ATLANTIS_TORSO_BARE_WALK_SHOT_1);
+
+			{
+				invariants::torso torso_def;
+
+				torso_def.forward_legs = to_animation_id(test_scene_legs_animation_id::SILVER_TROUSERS);
+				torso_def.strafe_legs = to_animation_id(test_scene_legs_animation_id::SILVER_TROUSERS_STRAFE);
+				torso_def.min_strafe_facing = 30;
+				torso_def.max_strafe_facing = 150;
+				torso_def.strafe_face_interp_mult = 0.5f;
+
+				auto act = [&](const auto a, const auto b, const auto c) {
+					torso_def.stances[a].actions[b].perform = to_animation_id(c);
+				};
+
+				torso_def.stances[item_holding_stance::BARE_LIKE].carry = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_BARE_WALK);
+				act(item_holding_stance::BARE_LIKE, weapon_action_type::PRIMARY, test_scene_torso_animation_id::ATLANTIS_TORSO_BARE_SHOT);
+				torso_def.stances[item_holding_stance::BARE_LIKE].chambering = torso_def.stances[item_holding_stance::BARE_LIKE].actions[weapon_action_type::PRIMARY].perform;
+				torso_def.stances[item_holding_stance::BARE_LIKE].pain = torso_def.stances[item_holding_stance::BARE_LIKE].actions[weapon_action_type::PRIMARY].perform;
+
+				{
+					auto& rifle_like = torso_def.stances[item_holding_stance::RIFLE_LIKE];
+
+					rifle_like.carry = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_RIFLE_WALK);
+					auto& shot = rifle_like.actions[weapon_action_type::PRIMARY].perform;
+					shot = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_RIFLE_SHOT);
+					rifle_like.pocket_to_mag = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_RIFLE_PTM);
+					rifle_like.grip_to_mag = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_RIFLE_GTM);
+					rifle_like.chambering = shot;
+					rifle_like.pain = shot;
+				}
+
+				{
+					auto& sniper_like = torso_def.stances[item_holding_stance::SNIPER_LIKE];
+					sniper_like = torso_def.stances[item_holding_stance::RIFLE_LIKE];
+					sniper_like.chambering = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_SNIPER_CHAMBER);
+				}
+
+				{
+					auto& pistol_like = torso_def.stances[item_holding_stance::PISTOL_LIKE];
+
+					pistol_like.carry = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_PISTOL_WALK);
+					auto& shot = pistol_like.actions[weapon_action_type::PRIMARY].perform;
+					pistol_like.actions[weapon_action_type::PRIMARY].perform = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_PISTOL_SHOT);
+					pistol_like.pocket_to_mag = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_PISTOL_PTM);
+					pistol_like.grip_to_mag = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_PISTOL_GTM);
+					pistol_like.chambering = shot;
+					pistol_like.pain = shot;
+				}
+
+				{
+					auto& heavy_like = torso_def.stances[item_holding_stance::HEAVY_LIKE];
+
+					heavy_like.carry = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_HEAVY_WALK);
+					auto& shot = heavy_like.actions[weapon_action_type::PRIMARY].perform;
+					heavy_like.actions[weapon_action_type::PRIMARY].perform = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_HEAVY_SHOT);
+					heavy_like.pocket_to_mag = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_HEAVY_GTM);
+					heavy_like.grip_to_mag = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_HEAVY_GTM);
+					heavy_like.chambering = shot;
+					heavy_like.pain = shot;
+				}
+
+				{
+					auto& knife_like = torso_def.stances[item_holding_stance::KNIFE_LIKE];
+
+					knife_like.carry = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_KNIFE_WALK);
+					knife_like.actions[weapon_action_type::PRIMARY].perform = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_KNIFE_PRIM);
+					knife_like.actions[weapon_action_type::SECONDARY].perform = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_KNIFE_SECD);
+					knife_like.actions[weapon_action_type::PRIMARY].returner = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_KNIFE_PRIM_RETURN);
+					knife_like.actions[weapon_action_type::SECONDARY].returner = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_KNIFE_SECD_RETURN);
+					//knife_like.pain = knife_like.actions[weapon_action_type::PRIMARY].perform;
+				}
+				{
+					auto& fists_like = torso_def.stances[item_holding_stance::FISTS_LIKE];
+
+					fists_like.carry = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_BARE_WALK);
+					fists_like.actions[weapon_action_type::PRIMARY].perform = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_KNIFE_PRIM);
+					fists_like.actions[weapon_action_type::SECONDARY].perform = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_KNIFE_SECD);
+					fists_like.actions[weapon_action_type::PRIMARY].returner = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_KNIFE_PRIM_RETURN);
+					fists_like.actions[weapon_action_type::SECONDARY].returner = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_KNIFE_SECD_RETURN);
+					fists_like.pain = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_BARE_SHOT);
+				}
+
+
+				torso_def.stances[item_holding_stance::AKIMBO].carry = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_AKIMBO_WALK);
+				act(item_holding_stance::AKIMBO, weapon_action_type::PRIMARY, test_scene_torso_animation_id::ATLANTIS_TORSO_AKIMBO_SHOT);
+				torso_def.stances[item_holding_stance::AKIMBO].chambering = torso_def.stances[item_holding_stance::AKIMBO].actions[weapon_action_type::PRIMARY].perform;
+				torso_def.stances[item_holding_stance::AKIMBO].pain = torso_def.stances[item_holding_stance::AKIMBO].actions[weapon_action_type::PRIMARY].perform;
+
+				torso_def.stances[item_holding_stance::DEAD_TATTERED].carry = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_TATTERED);
+				torso_def.stances[item_holding_stance::DEAD_TATTERED_NOARM].carry = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_TATTERED_NOARM);
+				torso_def.stances[item_holding_stance::DEAD_TATTERED_NOARMS].carry = to_animation_id(test_scene_torso_animation_id::ATLANTIS_TORSO_TATTERED_NOARMS);
+
+				meta.set(torso_def);
+			}
+
+			{
+				invariants::head head_def;
+
+				head_def.head_image = to_image_id(test_scene_image_id::ATLANTIS_HEAD);
+				head_def.shooting_head_image = to_image_id(test_scene_image_id::ATLANTIS_HEAD);
+				head_def.shake_rotation_damping = 10.f;
+				head_def.impulse_mult_on_shake = 1000.f;
+
+				meta.set(head_def);
+			}
+
+			meta.get<components::sentience>().official_faction = faction_type::ATLANTIS;
+		}
 	}
 }

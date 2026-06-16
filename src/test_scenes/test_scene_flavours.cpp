@@ -405,6 +405,19 @@ namespace test_flavours {
 			f.filter = filters[predefined_filter_type::DEAD_LYING_CHARACTER];
 		}
 
+		{
+			auto& meta = flavour_with_sprite(
+				test_plain_sprited_bodies::DETACHED_ATLANTIS_HEAD,
+				test_scene_image_id::ATLANTIS_HEAD,
+				render_layer::SOLID_OBSTACLES
+			);
+
+			auto& f = test_flavours::add_lying_item_dynamic_body(meta);
+			f.density *= 5.0;
+			f.restitution *= 2.;
+			f.filter = filters[predefined_filter_type::DEAD_LYING_CHARACTER];
+		}
+
 		auto make_detached_arm = [&](const test_plain_sprited_bodies id, const test_scene_image_id image) {
 			auto& meta = flavour_with_sprite(
 				id,
@@ -422,6 +435,8 @@ namespace test_flavours {
 		make_detached_arm(test_plain_sprited_bodies::DETACHED_RESISTANCE_ARM_BOTTOM, test_scene_image_id::RESISTANCE_GORE_ARM_BOTTOM);
 		make_detached_arm(test_plain_sprited_bodies::DETACHED_METROPOLIS_ARM_TOP, test_scene_image_id::METROPOLIS_GORE_ARM_TOP);
 		make_detached_arm(test_plain_sprited_bodies::DETACHED_METROPOLIS_ARM_BOTTOM, test_scene_image_id::METROPOLIS_GORE_ARM_BOTTOM);
+		make_detached_arm(test_plain_sprited_bodies::DETACHED_ATLANTIS_ARM_TOP, test_scene_image_id::ATLANTIS_GORE_ARM_TOP);
+		make_detached_arm(test_plain_sprited_bodies::DETACHED_ATLANTIS_ARM_BOTTOM, test_scene_image_id::ATLANTIS_GORE_ARM_BOTTOM);
 
 		auto make_lying_corpse_flavour = [&](
 			const test_plain_sprited_bodies id,
@@ -449,6 +464,9 @@ namespace test_flavours {
 		make_lying_corpse_flavour(test_plain_sprited_bodies::LYING_CORPSE_RESISTANCE, test_scene_image_id::RESISTANCE_TORSO_CORPSE);
 		make_lying_corpse_flavour(test_plain_sprited_bodies::LYING_CORPSE_RESISTANCE_NOARM, test_scene_image_id::RESISTANCE_TORSO_CORPSE_NOARM);
 		make_lying_corpse_flavour(test_plain_sprited_bodies::LYING_CORPSE_RESISTANCE_NOARMS, test_scene_image_id::RESISTANCE_TORSO_CORPSE_NOARMS);
+		make_lying_corpse_flavour(test_plain_sprited_bodies::LYING_CORPSE_ATLANTIS, test_scene_image_id::ATLANTIS_TORSO_CORPSE);
+		make_lying_corpse_flavour(test_plain_sprited_bodies::LYING_CORPSE_ATLANTIS_NOARM, test_scene_image_id::ATLANTIS_TORSO_CORPSE_NOARM);
+		make_lying_corpse_flavour(test_plain_sprited_bodies::LYING_CORPSE_ATLANTIS_NOARMS, test_scene_image_id::ATLANTIS_TORSO_CORPSE_NOARMS);
 
 		{
 			auto& meta = get_test_flavour(flavours, test_touch_collectibles::GOLD_COIN);

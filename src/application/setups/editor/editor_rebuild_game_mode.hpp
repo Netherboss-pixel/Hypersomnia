@@ -69,7 +69,7 @@ auto to_game_requested_equipment(
 using default_rulesets_tuple = std::tuple<test_mode_ruleset, arena_mode_ruleset>;
 
 template <class T>
-constexpr bool is_arena_submode_v = is_one_of_v<T, editor_bomb_defusal_mode, editor_gun_game_mode>;
+constexpr bool is_arena_submode_v = is_one_of_v<T, editor_bomb_defusal_mode, editor_gun_game_mode, editor_trifaction_mode>;
 
 template <class F>
 auto setup_ruleset_from_editor_mode(
@@ -244,6 +244,9 @@ auto setup_ruleset_from_editor_mode(
 		}
 		else if constexpr(std::is_same_v<I, editor_bomb_defusal_mode>) {
 			make_arena_mode_rules(game_mode.editable.bomb_defusal);
+		}
+		else if constexpr(std::is_same_v<I, editor_trifaction_mode>) {
+			make_arena_mode_rules(game_mode.editable.tri_faction);
 		}
 		else {
 			static_assert(always_false_v<I>, "Non-exhaustive if constexpr");

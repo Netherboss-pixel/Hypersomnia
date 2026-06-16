@@ -412,15 +412,24 @@ arena_mode_ruleset::arena_mode_ruleset() {
 	{
 		auto& resistance = rs.factions[faction_type::RESISTANCE];
 		auto& metropolis = rs.factions[faction_type::METROPOLIS];
+		auto& atlantis = rs.factions[faction_type::ATLANTIS];
+
+		metropolis.movement_speed_mult = 0.85f;
+		metropolis.health_mult = 1.25f;
+
+		resistance.use_bombsites_as_spawns = true;
 
 		resistance.round_start_eq.personal_deposit_wearable = to_entity_flavour_id(test_container_items::STANDARD_PERSONAL_DEPOSIT);
 		metropolis.round_start_eq.personal_deposit_wearable = to_entity_flavour_id(test_container_items::STANDARD_PERSONAL_DEPOSIT);
+		atlantis.round_start_eq.personal_deposit_wearable = to_entity_flavour_id(test_container_items::STANDARD_PERSONAL_DEPOSIT);
 
 		resistance.round_start_eq.shoulder_wearable = to_entity_flavour_id(test_melee_weapons::YELLOW_DAGGER);
 		metropolis.round_start_eq.shoulder_wearable = to_entity_flavour_id(test_melee_weapons::CYAN_SCYTHE);
+		atlantis.round_start_eq.shoulder_wearable = to_entity_flavour_id(test_melee_weapons::POSEIDON);
 
 		resistance.warmup_initial_eq.personal_deposit_wearable = to_entity_flavour_id(test_container_items::STANDARD_PERSONAL_DEPOSIT);
 		metropolis.warmup_initial_eq.personal_deposit_wearable = to_entity_flavour_id(test_container_items::STANDARD_PERSONAL_DEPOSIT);
+		atlantis.warmup_initial_eq.personal_deposit_wearable = to_entity_flavour_id(test_container_items::STANDARD_PERSONAL_DEPOSIT);
 
 #define GIVE_FULL 0
 #define GIVE_AMMO 1
@@ -428,20 +437,26 @@ arena_mode_ruleset::arena_mode_ruleset() {
 #if GIVE_AMMO
 		resistance.warmup_initial_eq.weapon = to_entity_flavour_id(test_melee_weapons::FURY_THROWER);
 		metropolis.warmup_initial_eq.weapon = to_entity_flavour_id(test_melee_weapons::POSEIDON);
+		atlantis.warmup_initial_eq.weapon = to_entity_flavour_id(test_melee_weapons::ELECTRIC_RAPIER);
 
 		metropolis.round_start_eq.weapon = to_entity_flavour_id(test_shootable_weapons::SN69);
 		resistance.round_start_eq.weapon = to_entity_flavour_id(test_shootable_weapons::KEK9);
+		atlantis.round_start_eq.weapon = to_entity_flavour_id(test_shootable_weapons::BILMER2000);
 #endif
 
 #if GIVE_FULL
 		metropolis.round_start_eq.weapon = to_entity_flavour_id(test_shootable_weapons::SZTURM);
 		resistance.round_start_eq.weapon = to_entity_flavour_id(test_shootable_weapons::BAKA47);
+		atlantis.round_start_eq.weapon = to_entity_flavour_id(test_shootable_weapons::VINDICATOR);
 
 		metropolis.round_start_eq.back_wearable = to_entity_flavour_id(test_tool_items::METROPOLIS_BACKPACK);
 		metropolis.round_start_eq.armor_wearable = to_entity_flavour_id(test_tool_items::ELECTRIC_ARMOR);
 
 		resistance.round_start_eq.back_wearable = to_entity_flavour_id(test_tool_items::RESISTANCE_BACKPACK);
 		resistance.round_start_eq.armor_wearable = to_entity_flavour_id(test_tool_items::ELECTRIC_ARMOR);
+
+		atlantis.round_start_eq.back_wearable = to_entity_flavour_id(test_tool_items::ATLANTIS_BACKPACK);
+		atlantis.round_start_eq.armor_wearable = to_entity_flavour_id(test_tool_items::ELECTRIC_ARMOR);
 #endif
 	}
 
@@ -471,6 +486,11 @@ arena_mode_ruleset::arena_mode_ruleset() {
 	}
 
 	{
+		auto& at = rs.view.event_sounds[faction_type::ATLANTIS];
+		at = rs.view.event_sounds[faction_type::METROPOLIS];
+	}
+
+	{
 		auto& streaks = rs.view.streak_defs;
 
 		auto add_streak = [&](const int num, const auto& message, const auto sound) {
@@ -497,11 +517,18 @@ arena_mode_ruleset::arena_mode_ruleset() {
 
 		mt[faction_type::RESISTANCE] = to_sound_id(test_scene_sound_id::MT_RESISTANCE_WINS);
 		mt[faction_type::METROPOLIS] = to_sound_id(test_scene_sound_id::MT_METROPOLIS_WINS);
+		mt[faction_type::ATLANTIS] = to_sound_id(test_scene_sound_id::MT_ATLANTIS_WINS);
 	}
 
 	{
 		auto& re = rs.view.win_sounds.resistance;
 		re = rs.view.win_sounds[faction_type::METROPOLIS];
+	}
+
+	{
+		auto& at = rs.view.win_sounds.atlantis;
+		at = rs.view.win_sounds[faction_type::METROPOLIS];
+		at[faction_type::ATLANTIS] = to_sound_id(test_scene_sound_id::MT_ATLANTIS_WINS);
 	}
 
 	rs.bomb_flavour = to_entity_flavour_id(test_hand_explosives::BOMB);
@@ -517,8 +544,7 @@ arena_mode_ruleset::arena_mode_ruleset() {
 	rs.view.wallbang_icon = to_image_id(test_scene_image_id::WALLBANG_ICON);
 
 	rs.view.square_logos[faction_type::METROPOLIS] = to_image_id(test_scene_image_id::METROPOLIS_SQUARE_LOGO);
-	// TODO: add atlantis logo
-	rs.view.square_logos[faction_type::ATLANTIS] = to_image_id(test_scene_image_id::METROPOLIS_SQUARE_LOGO);
+	rs.view.square_logos[faction_type::ATLANTIS] = to_image_id(test_scene_image_id::ATLANTIS_SQUARE_LOGO);
 	rs.view.square_logos[faction_type::RESISTANCE] = to_image_id(test_scene_image_id::RESISTANCE_SQUARE_LOGO);
 
 	{

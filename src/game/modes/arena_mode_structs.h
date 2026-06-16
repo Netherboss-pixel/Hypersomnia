@@ -202,6 +202,9 @@ struct arena_mode_faction_rules {
 	// GEN INTROSPECTOR struct arena_mode_faction_rules
 	requested_equipment round_start_eq;
 	requested_equipment warmup_initial_eq;
+	real32 movement_speed_mult = 1.0f;
+	real32 health_mult = 1.0f;
+	bool use_bombsites_as_spawns = false;
 	// END GEN INTROSPECTOR
 };
 

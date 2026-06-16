@@ -123,6 +123,21 @@ inline auto find_faction_character_flavour(const cosmos& cosm, const faction_typ
 }
 
 template <class F>
+auto for_each_bombsite_marker(const cosmos& cosm, F&& callback) {
+	cosm.for_each_having<invariants::area_marker>(
+		[&](const auto typed_handle) -> callback_result {
+			const auto& marker = typed_handle.template get<invariants::area_marker>();
+
+			if (marker.type == area_marker_type::BOMBSITE) {
+				return continue_or_callback_result(std::forward<F>(callback), typed_handle);
+			}
+
+			return callback_result::CONTINUE;
+		}
+	);
+}
+
+template <class F>
 auto for_each_faction_spawn(const cosmos& cosm, const faction_type faction, F&& callback) {
 	cosm.for_each_having<invariants::point_marker>(
 		[&](const auto typed_handle) -> callback_result {

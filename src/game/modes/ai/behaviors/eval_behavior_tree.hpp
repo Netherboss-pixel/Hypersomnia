@@ -17,6 +17,9 @@ struct ai_round_state {
 	bool bomb_planted = false;
 	entity_id bomb_entity;
 	real32 global_time_secs = 0.0f;
+
+	faction_type bombing_faction = faction_type::RESISTANCE;
+	faction_type defusing_faction = faction_type::METROPOLIS;
 };
 
 /*
@@ -52,8 +55,8 @@ inline ai_behavior_variant eval_behavior_tree(
 	const bool is_gun_game,
 	const bool should_avoid_combat = false
 ) {
-	const bool is_metropolis = (bot_faction == faction_type::METROPOLIS);
-	const bool is_resistance = (bot_faction == faction_type::RESISTANCE);
+	const bool is_bombing_team = (bot_faction == round_state.bombing_faction);
+	const bool is_defusing_team = (bot_faction == round_state.defusing_faction);
 	const auto global_time_secs = round_state.global_time_secs;
 
 	(void)character_pos;
@@ -78,26 +81,26 @@ inline ai_behavior_variant eval_behavior_tree(
 	}
 
 	/*
-		Priority 2: DEFUSE mission (Metropolis, bomb planted).
+		Priority 2: DEFUSE mission (Defusing team, bomb planted).
 		Defuse mission assignment is handled in update_arena_mode_ai_team.
 	*/
-	if (round_state.bomb_planted && is_metropolis) {
+	if (round_state.bomb_planted && is_defusing_team) {
 		if (team_state.bot_with_defuse_mission == controlled_character_id) {
 			return ai_behavior_defuse{};
 		}
 	}
 
 	/*
-		Priority 3: RETRIEVE_BOMB mission (Resistance, bomb on ground or held by enemy).
+		Priority 3: RETRIEVE_BOMB mission (Bombing team, bomb on ground or held by enemy).
 	*/
-	if (!round_state.bomb_planted && is_resistance && round_state.bomb_entity.is_set()) {
+	if (!round_state.bomb_planted && is_bombing_team && round_state.bomb_entity.is_set()) {
 		const auto bomb_handle = cosm[round_state.bomb_entity];
 
 		if (bomb_handle.alive()) {
 			const auto bomb_owner = bomb_handle.get_owning_transfer_capability();
 			const bool bomb_on_ground = !bomb_owner.alive();
 			const bool bomb_held_by_enemy = bomb_owner.alive() && 
-				bomb_owner.get_official_faction() == faction_type::METROPOLIS;
+				bomb_owner.get_official_faction() == round_state.defusing_faction;
 
 			if (bomb_on_ground || bomb_held_by_enemy) {
 				if (team_state.bot_with_bomb_retrieval_mission == controlled_character_id) {

@@ -32,7 +32,7 @@ struct cosmos_solvable_significant;
 
 class arena_mode;
 
-struct arena_mode_ruleset {
+struct arena_mode_ruleset { // TODO: Give the players ability to choose values at runtime
 	using mode_type = arena_mode;
 
 	// GEN INTROSPECTOR struct arena_mode_ruleset
@@ -53,17 +53,17 @@ struct arena_mode_ruleset {
 
 	uint32_t allow_spawn_for_secs_after_starting = 10;
 	uint32_t max_players_per_team = 32;
-	uint32_t round_secs = 120;
+	uint32_t round_secs = 1200;
 	real32 round_end_secs = 5;
 	uint32_t freeze_secs = 10;
 	uint32_t buy_secs_after_freeze = 30;
-	uint32_t warmup_secs = 45;
+	uint32_t warmup_secs = 450;
 	uint32_t warmup_respawn_after_ms = 2000;
-	uint32_t max_team_score = 16;
+	uint32_t max_team_score = 160;
 	uint32_t halftime_summary_seconds = 8;
 	uint32_t match_summary_seconds = 15;
 	uint32_t game_commencing_seconds = 3;
-	meter_value_type minimal_damage_for_assist = 41;
+	meter_value_type minimal_damage_for_assist = 20;
 	per_actual_faction<arena_mode_faction_rules> factions;
 
 	constrained_entity_flavour_id<invariants::explosive, invariants::hand_fuse> bomb_flavour;
@@ -78,7 +78,7 @@ struct arena_mode_ruleset {
 	bool hide_details_when_spectating_enemies = true;
 
 	bool enable_item_shop = true;
-	bool warmup_enable_item_shop = false;
+	bool warmup_enable_item_shop = true;
 
 	arena_mode_economy_rules economy;
 	arena_mode_view_rules view;
@@ -99,6 +99,7 @@ struct arena_mode_ruleset {
 
 	bool is_ffa() const;
 	bool is_gun_game() const;
+	bool is_trifaction() const;
 };
 
 struct arena_mode_faction_state {
@@ -272,9 +273,14 @@ public:
 	struct participating_factions {
 		faction_type bombing = faction_type::SPECTATOR;
 		faction_type defusing = faction_type::SPECTATOR;
+		faction_type third = faction_type::SPECTATOR;
 
 		bool valid() const {
-			return bombing != faction_type::SPECTATOR && defusing != faction_type::SPECTATOR;
+			int count = 0;
+			if (bombing != faction_type::SPECTATOR) ++count;
+			if (defusing != faction_type::SPECTATOR) ++count;
+			if (third != faction_type::SPECTATOR) ++count;
+			return count >= 2;
 		}
 
 		static auto fallback() {
@@ -285,10 +291,14 @@ public:
 		void for_each(F callback) const {
 			callback(bombing);
 			callback(defusing);
+
+			if (third != faction_type::SPECTATOR) {
+				callback(third);
+			}
 		}
 
 		std::size_t size() const {
-			return 2;
+			return 2 + (third != faction_type::SPECTATOR ? 1 : 0);
 		}
 
 		auto get_all() const {
@@ -384,7 +394,7 @@ private:
 	void setup_round(input, logic_step, const round_transferred_players&, setup_next_round_params = {});
 	void reshuffle_spawns(const cosmos&, arena_mode_faction_state&);
 
-	void fill_spawns(const cosmos&, faction_type, arena_mode_faction_state& out);
+	void fill_spawns(const cosmos&, faction_type, const arena_mode_faction_rules&, arena_mode_faction_state& out);
 
 	void set_players_frozen(input in, bool flag);
 	void release_triggers_of_weapons_of_players(input in);

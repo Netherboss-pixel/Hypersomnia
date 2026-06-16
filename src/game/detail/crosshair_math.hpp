@@ -18,7 +18,7 @@ vec2 calc_crosshair_displacement(const E& self, bool consider_recoil_position) {
 			considered_base_offset += recoil.position;
 		}
 		
-		considered_base_offset.rotate(recoil.rotation);
+		considered_base_offset.rotate(recoil.rotation + crosshair->sway_angle);
 
 		return considered_base_offset;
 	}

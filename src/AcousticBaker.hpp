@@ -1,8 +1,9 @@
 #include <algorithm>
 #include <cmath>
 #include <vector>
+#include <queue>
 
-// Our discrete acoustic map grid
+// Our discrete acoustic map grid (for verification)
 // 0 = air, 1 = solid barrier
 std::vector<uint8_t> acoustic_grid;
 int grid_width = 0;
@@ -43,7 +44,7 @@ void bake_acoustic_grid(const cosmos &world, float map_pixel_width,
     // Note: Replace this placeholder loop with the engine's exact vertex loop
     // structure (e.g., poly_shape.get_vertices() or poly_shape.vertices) if a
     // direct bounding box method is unavailable.
-    for (const auto &vertex : poly_shape.vertices) {
+    for (const auto &vertex : poly_shape.source_polygon) {
       if (vertex.x < min_x)
         min_x = vertex.x;
       if (vertex.x > max_x)

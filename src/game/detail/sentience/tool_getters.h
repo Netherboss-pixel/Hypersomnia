@@ -28,6 +28,15 @@ real32 get_movement_speed_mult(const E& subject) {
 		freed_pe_ratio = 1.f - personal_electricity.get_ratio();
 	}
 
+	const real32 faction_mult = [&]() {
+		if constexpr (E::template has<components::sentience>()) {
+			if (const auto* const sentience = subject.template find<components::sentience>()) {
+				return sentience->movement_speed_mult;
+			}
+		}
+		return 1.f;
+	}();
+
 	if (const auto armor_slot = subject[slot_function::TORSO_ARMOR]) {
 		if (const auto tool_item = armor_slot.get_item_if_any()) {
 			if (const auto tool = tool_item.template find<invariants::tool>()) {
@@ -37,10 +46,11 @@ real32 get_movement_speed_mult(const E& subject) {
 					mult += (1.f - mult) * freed_pe_ratio;
 				}
 
-				return mult;
+				return mult * faction_mult;
 			}
 		}
 	}
 
-	return 1.f;
+	return faction_mult;
 }
+

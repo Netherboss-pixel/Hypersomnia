@@ -69,21 +69,23 @@ void update_arena_mode_ai_team(
 	randomization& rng,
 	const cosmos_navmesh& navmesh,
 	const entity_id bomb_entity,
-	pathfinding_context* pathfinding_ctx
+	pathfinding_context* pathfinding_ctx,
+	const faction_type bombing_faction,
+	const faction_type defusing_faction
 ) {
 	/*
-		Resistance: if team has no chosen_bombsite yet, pick one randomly.
+		Bombing team: if team has no chosen_bombsite yet, pick one randomly.
 	*/
-	if (faction == faction_type::RESISTANCE && team_state.chosen_bombsite == marker_letter_type::COUNT) {
+	if (faction == bombing_faction && team_state.chosen_bombsite == marker_letter_type::COUNT) {
 		team_state.chosen_bombsite = ::choose_random_bombsite(arena_meta, rng);
 	}
 
 	/*
-		Metropolis: rebalance patrol_letter distribution once per step.
+		Defusing team: rebalance patrol_letter distribution once per step.
 		If any bot's letter is over-covered by 2+ compared to the least-covered,
 		switch that bot to the least-covered letter.
 	*/
-	if (faction == faction_type::METROPOLIS && !bomb_planted) {
+	if (faction == defusing_faction && !bomb_planted) {
 		const auto least = ::find_least_assigned_bombsite(cosm, team_state, arena_meta);
 		const auto most = ::find_most_assigned_bombsite(cosm, team_state, arena_meta);
 
@@ -103,13 +105,13 @@ void update_arena_mode_ai_team(
 	}
 
 	/*
-		Metropolis: when bomb is planted, select the bot with the shortest path to
+		Defusing team: when bomb is planted, select the bot with the shortest path to
 		the bomb as the defuser — but only if the current defuser is dead/unconscious
 		(or none assigned).  Non-combat bots are preferred candidates; if all alive
 		conscious bots are in combat, all of them are considered so the closest one
 		can still take the mission.
 	*/
-	if (faction == faction_type::METROPOLIS && bomb_planted) {
+	if (faction == defusing_faction && bomb_planted) {
 		if (!sentient_and_conscious(cosm[team_state.bot_with_defuse_mission])) {
 			struct candidate_t {
 				entity_id char_id;
@@ -120,7 +122,7 @@ void update_arena_mode_ai_team(
 				std::vector<candidate_t> result;
 
 				for (auto& bot : only_bot(players)) {
-					if (bot.second.get_faction() != faction_type::METROPOLIS) {
+					if (bot.second.get_faction() != defusing_faction) {
 						continue;
 					}
 
@@ -227,14 +229,14 @@ void update_arena_mode_ai_team(
 		and steer all living Metropolis bots to patrol that site.
 		Only done once per round (guarded by bomb_plant_handled).
 	*/
-	if (faction == faction_type::METROPOLIS && bomb_planted && !team_state.bomb_plant_handled) {
+	if (faction == defusing_faction && bomb_planted && !team_state.bomb_plant_handled) {
 		if (const auto bomb_handle = cosm[bomb_entity]) {
 			if (const auto* fuse = bomb_handle.find<components::hand_fuse>()) {
 				if (fuse->bombsite_letter != static_cast<uint8_t>(-1)) {
 					const auto planted_letter = static_cast<marker_letter_type>(fuse->bombsite_letter);
 
 					for (auto& bot : only_bot(players)) {
-						if (bot.second.get_faction() != faction_type::METROPOLIS) {
+						if (bot.second.get_faction() != defusing_faction) {
 							continue;
 						}
 
@@ -270,10 +272,12 @@ arena_ai_result update_arena_mode_ai(
 	const bool bomb_planted,
 	const entity_id bomb_entity,
 	pathfinding_context* pathfinding_ctx,
-	bool in_buy_area,
+	const bool in_buy_area,
 	const bool is_freeze_time,
 	const std::size_t bot_index,
-	const std::size_t num_bots
+	const std::size_t num_bots,
+	const faction_type bombing_faction,
+	const faction_type defusing_faction
 ) {
 	auto stable_rng = randomization(stable_round_rng);
 
@@ -319,18 +323,18 @@ arena_ai_result update_arena_mode_ai(
 		===========================================================================
 	*/
 
-	if (bot_faction == faction_type::METROPOLIS && ai_state.patrol_letter == marker_letter_type::COUNT) {
+	if (bot_faction == defusing_faction && ai_state.patrol_letter == marker_letter_type::COUNT) {
 		ai_state.patrol_letter = ::find_least_assigned_bombsite(cosm, team_state, arena_meta).letter;
 	}
 
 	/*
-		Resistance bots all go to the team's chosen bombsite — there is no
+		Bombing team bots all go to the team's chosen bombsite — there is no
 		per-bot letter split.  Always keep patrol_letter in sync so a
 		mid-round change (e.g. bomb carrier realigning to nearest bombsite)
 		is picked up immediately by every bot.
 	*/
 	if (
-		bot_faction == faction_type::RESISTANCE &&
+		bot_faction == bombing_faction &&
 		team_state.chosen_bombsite != marker_letter_type::COUNT &&
 		!ai_state.escaping_explosion
 	) {
@@ -345,14 +349,14 @@ arena_ai_result update_arena_mode_ai(
 	}
 
 	/*
-		RESISTANCE escape: when the bomb has <= 6 seconds until explosion,
+		Bombing team escape: when the bomb has <= 6 seconds until explosion,
 		change patrol_letter to a different bombsite so the bot runs away.
 		If only one bombsite exists, set patrol_letter to COUNT so that
 		patrol_process uses source_spawn_point as fallback.
 	*/
 
 	if (
-		bot_faction == faction_type::RESISTANCE &&
+		bot_faction == bombing_faction &&
 		bomb_planted &&
 		!ai_state.escaping_explosion &&
 		bomb_entity.is_set()
@@ -420,7 +424,7 @@ arena_ai_result update_arena_mode_ai(
 		it indefinitely. This avoids ugly state transitions when the defuse mission
 		changes hands mid-round.
 	*/
-	const bool defuse_soon = bomb_planted && bot_faction == faction_type::METROPOLIS;
+	const bool defuse_soon = bomb_planted && bot_faction == defusing_faction;
 
 	auto get_bomb_time_remaining = [&]() -> real32 {
 		if (!bomb_planted || !bomb_entity.is_set()) {
@@ -536,12 +540,12 @@ arena_ai_result update_arena_mode_ai(
 
 	/*
 		===========================================================================
-		PHASE 0.75: If bomb is planted and a METROPOLIS soldier is defusing,
-		alert RESISTANCE soldiers about the defuser.
+		PHASE 0.75: If bomb is planted and a defusing team soldier is defusing,
+		alert bombing team soldiers about the defuser.
 		===========================================================================
 	*/
 
-	if (bomb_planted && bot_faction == faction_type::RESISTANCE) {
+	if (bomb_planted && bot_faction == bombing_faction) {
 		if (const auto bomb_handle = cosm[bomb_entity]) {
 			if (const auto* fuse = bomb_handle.find<components::hand_fuse>()) {
 				const auto defuser_handle = cosm[fuse->character_now_defusing];
@@ -563,15 +567,15 @@ arena_ai_result update_arena_mode_ai(
 
 	/*
 		===========================================================================
-		PHASE 0.875: If bomb is being planted by a RESISTANCE soldier, alert this
-		METROPOLIS bot so it rushes to engage the planter.
+		PHASE 0.875: If bomb is being planted by a bombing team soldier, alert this
+		defusing team bot so it rushes to engage the planter.
 		Only queued when the bot is not already in combat.
 		===========================================================================
 	*/
 
 	if (
 		!bomb_planted &&
-		bot_faction == faction_type::METROPOLIS &&
+		bot_faction == defusing_faction &&
 		!::is_behavior<ai_behavior_combat>(ai_state.last_behavior) &&
 		bomb_entity.is_set()
 	) {
@@ -662,7 +666,9 @@ arena_ai_result update_arena_mode_ai(
 	const auto round_state = ai_round_state{
 		bomb_planted,
 		bomb_entity,
-		global_time_secs
+		global_time_secs,
+		bombing_faction,
+		defusing_faction
 	};
 
 	const auto desired_behavior = ::eval_behavior_tree(
@@ -1251,7 +1257,9 @@ void post_solve_arena_mode_ai(
 	const entity_id controlled_character_id,
 	const bool is_ffa,
 	const bool is_gun_game,
-	const bool bomb_planted
+	const bool bomb_planted,
+	const faction_type bombing_faction,
+	const faction_type defusing_faction
 ) {
 	const auto character_handle = cosm[controlled_character_id];
 

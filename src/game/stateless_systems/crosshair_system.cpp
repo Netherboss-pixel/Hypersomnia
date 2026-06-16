@@ -85,7 +85,7 @@ void crosshair_system::integrate_crosshair_recoils(const logic_step step) {
 	auto& cosm = step.get_cosmos();
 
 	cosm.for_each_having<components::crosshair>(
-		[&](const auto subject) {
+		[&](const auto subject) -> void {
 			auto& crosshair = subject.template get<components::crosshair>();
 			auto& crosshair_def = subject.template get<invariants::crosshair>();
 			auto& recoil = crosshair.recoil;
@@ -122,6 +122,32 @@ void crosshair_system::integrate_crosshair_recoils(const logic_step step) {
 			if (repro::fabs(recoil.rotation) < 0.0001f) {
 				recoil.rotation = 0.f;
 			}
+
+			const auto sway_multiplier = [&]() {
+				if (subject.template has<components::sentience>()) {
+					const auto& sentience = subject.template get<components::sentience>();
+					const auto& cp = sentience.template get<consciousness_meter_instance>();
+
+					if (cp.maximum > 0.f) {
+						const auto ratio = cp.value / cp.maximum;
+						return 1.f + (1.f - ratio) * 4.f;
+					}
+				}
+
+				return 1.f;
+			}();
+
+			const auto time = static_cast<float>(cosm.get_total_seconds_passed());
+
+			constexpr auto freq1 = 0.5f;
+			constexpr auto freq2 = 0.8f;
+			constexpr auto amp1 = 0.5f;
+			constexpr auto amp2 = 0.3f;
+
+			crosshair.sway_angle = sway_multiplier * (
+				amp1 * repro::sin(freq1 * 2.f * PI<float> * time) +
+				amp2 * repro::sin(freq2 * 2.f * PI<float> * time)
+			);
 		}
 	);
 }

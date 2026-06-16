@@ -114,6 +114,38 @@ struct editor_gun_game_mode {
 	}
 };
 
+struct editor_trifaction_mode {
+	using subrules_type = trifaction_rules;
+	static constexpr bool json_serialize_in_parent = true;
+
+	// GEN INTROSPECTOR struct editor_trifaction_mode
+	uint32_t max_team_score = 16;
+	uint8_t default_bot_quota = 15;
+
+	uint32_t warmup_time = 16;
+	uint32_t freeze_time = 10;
+	uint32_t buy_time = 30;
+	uint32_t round_time = 100;
+	real32 round_end_time = 5.0f;
+
+	uint32_t respawn_after_ms = 0;
+	uint32_t spawn_protection_ms = 0;
+
+	per_actual_faction<editor_requested_equipment> warmup_equipment;
+	per_actual_faction<editor_requested_equipment> round_start_equipment;
+	// END GEN INTROSPECTOR
+
+	bool operator==(const editor_trifaction_mode&) const = default;
+
+	static auto get_identifier() {
+		return "tri_faction";
+	}
+
+	static auto get_display_name() {
+		return subrules_type::get_name();
+	}
+};
+
 struct editor_quick_test_mode {
 	static constexpr bool json_serialize_in_parent = true;
 
@@ -141,6 +173,7 @@ struct editor_game_mode_resource_editable {
 	editor_quick_test_mode quick_test;
 	editor_bomb_defusal_mode bomb_defusal;
 	editor_gun_game_mode gun_game;
+	editor_trifaction_mode tri_faction;
 	// END GEN INTROSPECTOR
 
 	bool operator==(const editor_game_mode_resource_editable&) const = default;
@@ -149,7 +182,8 @@ struct editor_game_mode_resource_editable {
 using editor_all_game_modes = type_list<
 	editor_quick_test_mode,
 	editor_bomb_defusal_mode,
-	editor_gun_game_mode
+	editor_gun_game_mode,
+	editor_trifaction_mode
 >;
 
 using editor_game_mode_id = type_in_list_id<editor_all_game_modes>;

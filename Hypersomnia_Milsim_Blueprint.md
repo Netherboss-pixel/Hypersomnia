@@ -25,7 +25,7 @@ In a true military simulation, information is the most lethal asset. The current
 * **The Constraints:** Restrict the active visual field to a **$90^{\circ}$ to $120^{\circ}$ forward cone**. Any entities, map sprites, or enemy characters outside this directional arc must be completely culled from the client's screen.
 * **Tactical Execution:** Forces players to manually "slice the pie" when clearing corners, exposing their presence pixel by pixel rather than instantly catching visual frames around hard angles.
 
-### Auditory Mapping & Sound Propagation
+###[NEEDS REVIEW] Auditory Mapping & Sound Propagation
 * **Mechanical Overhaul:** Decouple standard spatial sound indicators from absolute positioning.
 * **The Constraints:** Implement a sound propagation delay based on physical distance tiles. Gunshots or rapid sprints in an adjacent closed room should sound muffled, heavily distorted, or echo through open structural doorways rather than traveling cleanly through solid concrete walls.
 * **Tactical Execution:** Blind fire or pre-firing corners becomes incredibly risky due to unreliable sound origins, forcing reliance on visual confirmation or teammate callouts.

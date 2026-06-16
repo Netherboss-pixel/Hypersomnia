@@ -18,7 +18,7 @@
     },
     "playtesting": {
         "mode": "bomb_defusal",
-        "starting_faction": "RESISTANCE",
+        "starting_faction": "ATLANTIS",
         "spawn_bots": true
     },
     "game_modes": {
@@ -4961,7 +4961,7 @@
         {
             "id": "bot_waypoint_patrol (5)",
             "type": "bot_waypoint_patrol",
-            "faction": "RESISTANCE",
+            "faction": "ATLANTIS",
             "pos": [1670.0, 3711.0],
             "rotation": -51.2216796875
         },
@@ -5046,28 +5046,28 @@
         {
             "id": "bot_waypoint_patrol (14)",
             "type": "bot_waypoint_patrol",
-            "faction": "RESISTANCE",
+            "faction": "ATLANTIS",
             "pos": [36.0, 2691.0],
             "rotation": 37.67060852050781
         },
         {
             "id": "bot_waypoint_patrol (15)",
             "type": "bot_waypoint_patrol",
-            "faction": "RESISTANCE",
+            "faction": "ATLANTIS",
             "pos": [-39.0, 3874.0],
             "rotation": -95.7571029663086
         },
         {
             "id": "bot_waypoint_push (3)",
             "type": "bot_waypoint_push",
-            "faction": "RESISTANCE",
+            "faction": "ATLANTIS",
             "camp": false,
             "pos": [135.0, 387.0]
         },
         {
             "id": "bot_waypoint_push (4)",
             "type": "bot_waypoint_push",
-            "faction": "RESISTANCE",
+            "faction": "ATLANTIS",
             "camp": false,
             "pos": [592.0, 2326.0],
             "rotation": -33.714508056640625
@@ -5075,7 +5075,7 @@
         {
             "id": "bot_waypoint_push (5)",
             "type": "bot_waypoint_push",
-            "faction": "RESISTANCE",
+            "faction": "ATLANTIS",
             "camp": false,
             "pos": [179.0, 3845.0],
             "rotation": -0.5273895263671875
@@ -5083,7 +5083,7 @@
         {
             "id": "bot_waypoint_push (6)",
             "type": "bot_waypoint_push",
-            "faction": "RESISTANCE",
+            "faction": "ATLANTIS",
             "camp": false,
             "pos": [328.0, 2037.0]
         },

@@ -52,6 +52,16 @@ namespace test_flavours {
 				brown.get<invariants::container>().slots[slot_function::ITEM_DEPOSIT].space_available = to_space_units("20");
 				test_flavours::add_sprite(brown, caches, test_scene_image_id::RESISTANCE_BACKPACK, white);
 			}
+
+			{
+				auto& atlantis_bp = get_test_flavour(flavours, test_tool_items::ATLANTIS_BACKPACK);
+				atlantis_bp = meta;
+				atlantis_bp.get<invariants::text_details>().name = format_enum(test_tool_items::ATLANTIS_BACKPACK);
+				atlantis_bp.get<invariants::item>().specific_to = faction_type::ATLANTIS;
+				atlantis_bp.get<invariants::item>().standard_price = 900;
+				atlantis_bp.get<invariants::container>().slots[slot_function::ITEM_DEPOSIT].space_available = to_space_units("25");
+				test_flavours::add_sprite(atlantis_bp, caches, test_scene_image_id::ATLANTIS_BACKPACK, white);
+			}
 		}
 
 		{

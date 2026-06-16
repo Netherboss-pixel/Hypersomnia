@@ -140,6 +140,8 @@ namespace components {
 		augs::stepped_timestamp when_lying_corpse_replaced;
 
 		faction_type official_faction = faction_type::SPECTATOR;
+		real32 movement_speed_mult = 1.f;
+		real32 health_mult = 1.f;
 		// END GEN INTROSPECTOR
 
 		bool is_requesting_any_interaction() const {

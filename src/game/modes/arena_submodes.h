@@ -40,7 +40,22 @@ struct gun_game_rules {
 	}
 };
 
+struct trifaction_rules {
+	// GEN INTROSPECTOR struct trifaction_rules
+	bool dummy = false;
+	// END GEN INTROSPECTOR
+
+	static constexpr bool has_economy() {
+		return true;
+	}
+
+	static auto get_name() {
+		return "Tri-Faction";
+	}
+};
+
 using all_subrules_variant = std::variant<
 	bomb_defusal_rules,
-	gun_game_rules
+	gun_game_rules,
+	trifaction_rules
 >;

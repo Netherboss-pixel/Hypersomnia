@@ -72,6 +72,8 @@ struct per_actual_faction {
 		switch (t) {
 			case faction_type::METROPOLIS:
 				return metropolis;
+			case faction_type::ATLANTIS:
+				return atlantis;
 			case faction_type::RESISTANCE:
 				return resistance;
 			default:
@@ -83,6 +85,8 @@ struct per_actual_faction {
 		switch (t) {
 			case faction_type::METROPOLIS:
 				return metropolis;
+			case faction_type::ATLANTIS:
+				return atlantis;
 			case faction_type::RESISTANCE:
 				return resistance;
 			default:

@@ -110,12 +110,9 @@ if (auto scope = augs::imgui::scoped_tree_node_ex(label)) {\
 	{ auto scope = scoped_id("##Metropolis"); EQUIPMENT_PROPERTIES(field.metropolis); }\
 	text_color("Resistance", yellow);\
 	{ auto scope = scoped_id("##Resistance"); EQUIPMENT_PROPERTIES(field.resistance); }\
+	text_color("Atlantis", yellow);\
+	{ auto scope = scoped_id("##Atlantis"); EQUIPMENT_PROPERTIES(field.atlantis); }\
 	ImGui::Separator();\
-	/*\
-		We'll only show the two relevant factions always, unless we have a three-way-conflict\
-		text_color("Atlantis", yellow);\
-		EQUIPMENT_PROPERTIES(field.atlantis);\
-	*/\
 }
 
 #define THEME_PROPERTY(label, field) \
@@ -2663,6 +2660,28 @@ EDIT_FUNCTION(
 			FACTION_EQUIPMENT_PROPERTY("Warmup equipment", gun_game.warmup_equipment);
 
 			ImGui::Separator();
+		}
+		else if constexpr(std::is_same_v<I, editor_trifaction_mode>) {
+			MULTIPROPERTY("Max team score", tri_faction.max_team_score);
+			MULTIPROPERTY("Default bot quota", tri_faction.default_bot_quota);
+
+			MULTIPROPERTY("Warmup time", tri_faction.warmup_time);
+			MULTIPROPERTY("Freeze time", tri_faction.freeze_time);
+			MULTIPROPERTY("Buy time", tri_faction.buy_time);
+
+			MULTIPROPERTY("Round time", tri_faction.round_time);
+			MULTIPROPERTY("Round end time", tri_faction.round_end_time);
+
+			MULTIPROPERTY("Respawn after (ms)", tri_faction.respawn_after_ms);
+			MULTIPROPERTY("Spawn protection (ms)", tri_faction.spawn_protection_ms);
+
+			ImGui::Separator();
+
+			FACTION_EQUIPMENT_PROPERTY("Warmup equipment", tri_faction.warmup_equipment);
+
+			ImGui::Separator();
+
+			FACTION_EQUIPMENT_PROPERTY("Round start equipment", tri_faction.round_start_equipment);
 		}
 		else {
 			static_assert(always_false_v<I>, "Non-exhaustive if constexpr");

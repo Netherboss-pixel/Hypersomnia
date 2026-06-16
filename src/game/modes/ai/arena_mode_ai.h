@@ -26,7 +26,9 @@ arena_ai_result update_arena_mode_ai(
 	const bool in_buy_area,
 	const bool is_freeze_time,
 	const std::size_t bot_index,
-	const std::size_t num_bots
+	const std::size_t num_bots,
+	const faction_type bombing_faction,
+	const faction_type defusing_faction
 );
 
 void update_arena_mode_ai_team(
@@ -39,7 +41,9 @@ void update_arena_mode_ai_team(
 	randomization& rng,
 	const cosmos_navmesh& navmesh,
 	const entity_id bomb_entity,
-	pathfinding_context* pathfinding_ctx
+	pathfinding_context* pathfinding_ctx,
+	const faction_type bombing_faction,
+	const faction_type defusing_faction
 );
 
 void post_solve_arena_mode_ai(
@@ -49,5 +53,7 @@ void post_solve_arena_mode_ai(
 	const entity_id controlled_character_id,
 	const bool is_ffa,
 	const bool is_gun_game,
-	const bool bomb_planted
+	const bool bomb_planted,
+	const faction_type bombing_faction,
+	const faction_type defusing_faction
 );
