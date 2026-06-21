@@ -132,9 +132,9 @@ struct main_menu_gui {
 	) {
 		const auto& gui_font = context.get_gui_font();
 
-		root.set_menu_buttons_colors(cyan);
-		root.buttons[std::size_t(main_menu_button_type::DOWNLOAD_MAPS)].colorize = rgba(green).mult_brightness(1.2f);
-		root.buttons[std::size_t(main_menu_button_type::QUICK_PLAY)].colorize = rgba(pink).mult_brightness(1.4f);
+		root.set_menu_buttons_colors(menu_buttons_colors);
+		root.buttons[std::size_t(main_menu_button_type::DOWNLOAD_MAPS)].colorize = rgba(download_maps_color).mult_brightness(1.2f);
+		root.buttons[std::size_t(main_menu_button_type::QUICK_PLAY)].colorize = rgba(quick_play_color).mult_brightness(1.4f);
 
 		root.set_menu_buttons_sizes(context.get_necessary_images(), gui_font, { 1000, 1000 });
 
@@ -147,9 +147,9 @@ struct main_menu_gui {
 		root.buttons[int(main_menu_button_type::DISCORD)].special_image = assets::necessary_image_id::DISCORD_BUTTON;
 		root.buttons[int(main_menu_button_type::GITHUB)].special_image = assets::necessary_image_id::GITHUB_BUTTON;
 
-		root.buttons[int(main_menu_button_type::STEAM)].colorize = white;
-		root.buttons[int(main_menu_button_type::DISCORD)].colorize = white;
-		root.buttons[int(main_menu_button_type::GITHUB)].colorize = white;
+		root.buttons[int(main_menu_button_type::STEAM)].colorize = white * menu_buttons_colors;
+		root.buttons[int(main_menu_button_type::DISCORD)].colorize = white * menu_buttons_colors;
+		root.buttons[int(main_menu_button_type::GITHUB)].colorize = white * menu_buttons_colors;
 
 		world.advance_elements(context, vdt);
 		world.rebuild_layouts(context);
@@ -170,7 +170,8 @@ struct main_menu_gui {
 			output.color_overlay(screen_size, rgba{ 0, 0, 0, 30 });
 		}
 
-		root.draw_background_behind_buttons(context);
+		/* Tint the buttons-background border with the menu amber shade (alpha is overridden inside). */
+		root.draw_background_behind_buttons(context, { 14, 10 }, { 0, 0, 0, 180 }, menu_buttons_colors);
 		world.draw(context);
 
 		auto determined_cursor = assets::necessary_image_id::GUI_CURSOR;

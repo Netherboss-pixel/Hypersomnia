@@ -152,10 +152,18 @@ public:
 
 		if (!this_id->special_image.has_value()) {
 			inside_col *= color;
+			auto prev_a = border_col.a;
 			border_col *= color;
+
+			if (detector.is_hovered || pushed) {
+				border_col.a = prev_a;
+			}
 		}
 
-		//special_image_color *= color;
+		auto corner_color = color;
+		corner_color.a = 255;
+
+		special_image_color *= corner_color;
 
 		const auto flip = this_id->corners.flip;
 		const auto internal_rc = this_id->corners.cornered_rc_to_internal_rc(necessarys, this_tree_entry.get_absolute_rect());
@@ -186,7 +194,7 @@ public:
 						[&](const button_corner_type type, const assets::necessary_image_id id, const ltrb drawn_rc) {
 							if (is_lb_complement(type)) { return; }
 							if (is_button_border(type)) {
-								output.aabb(necessarys.at(id), drawn_rc, color, flip);
+								output.aabb(necessarys.at(id), drawn_rc, corner_color, flip);
 							}
 						}
 					);
@@ -204,7 +212,7 @@ public:
 						[&](const button_corner_type type, const assets::necessary_image_id id, const ltrb drawn_rc) {
 							if (is_lb_complement(type)) { return; }
 							if (is_button_corner(type) && is_button_border(type)) {
-								output.aabb(necessarys.at(id), drawn_rc, color, flip);
+								output.aabb(necessarys.at(id), drawn_rc, corner_color, flip);
 							}
 						}
 					);

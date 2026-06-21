@@ -394,6 +394,7 @@ enum class test_sound_decorations {
 	GLASS_DAMAGE_SOUND,
 
 	LAVA_AMBIENCE,
+	AMBIENCE_WIND,
 
 	COUNT
 	// END GEN INTROSPECTOR

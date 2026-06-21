@@ -35,6 +35,8 @@ enum class official_sounds {
 	GLASS_DAMAGE,
 	COLLISION_GLASS,
 
+	AMBIENCE_WIND,
+
 	COUNT
 	// END GEN INTROSPECTOR
 };

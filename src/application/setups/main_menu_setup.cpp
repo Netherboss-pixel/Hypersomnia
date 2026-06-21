@@ -60,12 +60,14 @@ struct main_menu_setup_detail {
 };
 
 void main_menu_setup::customize_for_viewing(config_json_table& config) const {
+	const auto previous_music_volume = config.audio_volume.music;
 	const auto previous_sfx_volume = config.audio_volume.sound_effects;
 	augs::read_json(detail->patch, config);
 	
 	/* Treat new volume as a multiplier */
 
 	config.audio_volume.sound_effects *= previous_sfx_volume;
+	config.audio_volume.music *= previous_music_volume;
 	config.drawing.cinematic_mode = true;
 	config.drawing.custom_zoom = 3.0f;
 }
@@ -177,7 +179,7 @@ main_menu_setup::main_menu_setup(
 			ruleset = *r;
 		}
 
-		viewed_character_id = cosm[mode.lookup(mode.add_player({ dummy_dynamic_vars, ruleset, cosm }, "Player", faction_type::METROPOLIS))].get_id();
+		viewed_character_id = cosm[mode.lookup(mode.add_player({ dummy_dynamic_vars, ruleset, cosm }, "Player", faction_type::RESISTANCE))].get_id();
 	}
 
 	const bool is_recording_available = is_intro_scene_available && false;
@@ -227,7 +229,11 @@ void main_menu_setup::draw_overlays(
 	const bool draw_menu_logo = true;
 
 	if (draw_menu_logo) {
-		output.aabb(game_logo, game_logo_rect);
+		/* Tint the logo with the menu amber shade, but keep it fully opaque. */
+		auto logo_color = menu_buttons_colors;
+		logo_color.a = 255;
+
+		output.aabb(game_logo, game_logo_rect, logo_color);
 	}
 #endif
 
@@ -261,7 +267,7 @@ void main_menu_setup::draw_overlays(
 
 		switch (t) {
 			case R::NONE:
-				return colored("Automatic updates are disabled.", gray);
+				return colored("Automatic updates are disabled.", gray * menu_buttons_colors.rgb());
 			case R::CANCELLED:
 				return colored("Automatic update was cancelled!", orange);
 			case R::FIRST_LAUNCH_AFTER_UPGRADE:
