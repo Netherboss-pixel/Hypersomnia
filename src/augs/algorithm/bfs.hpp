@@ -98,7 +98,7 @@ namespace augs {
 			const auto [current, first_step] = bfs_queue.front();
 			bfs_queue.pop();
 
-			for_each_neighbor(current, [&](const Id neighbor) {
+			for_each_neighbor(current, [first_step, &process_neighbor](const Id neighbor) {
 				return process_neighbor(first_step, neighbor);
 			});
 
