@@ -665,7 +665,11 @@ void arena_mode::fill_spawns(const cosmos& cosm, faction_type faction, const are
 		for_each_bombsite_marker(cosm, adder);
 	}
 	else {
-		for_each_faction_spawn(cosm, faction, adder);
+		auto spawn_faction = faction;
+		if (faction_rules.spawn_at_faction_spawns != faction_type::COUNT) {
+			spawn_faction = faction_rules.spawn_at_faction_spawns;
+		}
+		for_each_faction_spawn(cosm, spawn_faction, adder);
 	}
 
 	reshuffle_spawns(cosm, out);
@@ -1694,6 +1698,15 @@ void arena_mode::count_knockout(const logic_step step, const input_type in, cons
 		if (const auto s = stats_of(ko.knockouter.id)) {
 			s->knockouts += knockouts_dt;
 
+			if (in.rules.is_trifaction() && knockouts_dt > 0) {
+				factions[ko.knockouter.faction].score += knockouts_dt;
+
+				if (factions[ko.knockouter.faction].score >= get_max_team_score(in)) {
+					factions[ko.knockouter.faction].score -= 1;
+					standard_victory(in, step, ko.knockouter.faction);
+				}
+			}
+
 			announce_knockout(s, knockouts_dt);
 
 			if (levelling_enabled(in)) {
@@ -2174,22 +2187,7 @@ void arena_mode::process_win_conditions(const input_type in, const logic_step st
 		standard_victory(in, step, winner);
 	};
 
-	if (in.rules.is_trifaction()) {
-		int conscious_teams = 0;
-		faction_type last_conscious_team = faction_type::SPECTATOR;
 
-		p.for_each([&](const faction_type f) {
-			if (num_players_in(f) > 0 && num_conscious_players_in(cosm, f) > 0) {
-				++conscious_teams;
-				last_conscious_team = f;
-			}
-		});
-
-		if (conscious_teams == 1) {
-			victory_for(last_conscious_team);
-			return;
-		}
-	}
 
 	if (in.rules.has_bomb_mechanics()) {
 		/* Bomb-based win-conditions */
@@ -3181,40 +3179,30 @@ per_actual_faction<uint8_t> arena_mode::calc_requested_bots_from_quotas(
 }
 
 per_actual_faction<uint8_t> arena_mode::calc_requested_bots(const const_input in) const {
-	const auto& over = in.dynamic_vars.bots_override;
+    const auto& over = in.dynamic_vars.bots_override;
 
-	if (ranked_state != ranked_state_type::NONE) {
-		return per_actual_faction<uint8_t> { 0u, 0u, 0u };
-	}
+    if (ranked_state != ranked_state_type::NONE) {
+        return per_actual_faction<uint8_t>{0u, 0u, 0u};
+    }
 
-	const bool levelling = casual_levels_enabled(in);
+    const bool levelling = casual_levels_enabled(in);
 
-	if (over.is_set() && !levelling) {
-		return calc_requested_bots_from_quotas(
-			in,
-			over.quota,
-			over.requester
-		);
-	}
+    if (over.is_set() && !levelling) {
+        return calc_requested_bots_from_quotas(in, over.quota, over.requester);
+    }
 
-	const auto p = calc_participating_factions(in);
-	const auto map_quota = in.rules.default_bot_quota;
 
-	if (levelling && p.valid() && map_quota > 0) {
-		const auto team_size = uint8_t(map_quota / int(p.size()));
-		return calc_requested_bots_from_casual_levels(in, team_size);
-	}
+    const auto map_quota = in.rules.default_bot_quota;
 
-	bot_quota single_total;
+    // Prepare single total quota for all participating factions
+    bot_quota single_total{};
+    single_total.emplace_back(uint8_t(map_quota));
 
-	if (map_quota > 0) {
-		single_total.emplace_back(uint8_t(map_quota));
-	}
-
-	return calc_requested_bots_from_quotas(
-		in,
-		single_total
-	);
+    return calc_requested_bots_from_quotas(
+        in,
+        single_total,
+        mode_player_id{}
+    );
 }
 
 per_actual_faction<uint8_t> arena_mode::get_current_num_bots_per_faction() const {

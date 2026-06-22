@@ -46,7 +46,7 @@ struct trifaction_rules {
 	// END GEN INTROSPECTOR
 
 	static constexpr bool has_economy() {
-		return true;
+		return false;
 	}
 
 	static auto get_name() {

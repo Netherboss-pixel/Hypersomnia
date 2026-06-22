@@ -58,6 +58,7 @@
 #include "game/modes/ai/tasks/bullet_avoidance.hpp"
 #include "game/modes/ai/tasks/danger_avoidance.hpp"
 #include "game/modes/ai/tasks/take_cover.hpp"
+#include "game/enums/faction_type.h"
 
 void update_arena_mode_ai_team(
 	cosmos& cosm,
@@ -272,7 +273,7 @@ arena_ai_result update_arena_mode_ai(
 	const bool bomb_planted,
 	const entity_id bomb_entity,
 	pathfinding_context* pathfinding_ctx,
-	const bool in_buy_area,
+	bool in_buy_area,
 	const bool is_freeze_time,
 	const std::size_t bot_index,
 	const std::size_t num_bots,
@@ -298,6 +299,7 @@ arena_ai_result update_arena_mode_ai(
 	const auto& physics = cosm.get_solvable_inferred().physics;
 
 	const auto ctx = ai_character_context{
+		defusing_faction,
 		ai_state,
 		character_pos,
 		physics,
@@ -1272,7 +1274,9 @@ void post_solve_arena_mode_ai(
 	const auto global_time_secs = cosm.get_total_seconds_passed();
 	const auto& physics = cosm.get_solvable_inferred().physics;
 
+	(void)bombing_faction;
 	const auto ctx = ai_character_context{
+		defusing_faction,
 		ai_state,
 		character_pos,
 		physics,
@@ -1288,7 +1292,7 @@ void post_solve_arena_mode_ai(
 	const bool is_deafened_ps = bot_sentience_ps != nullptr && bot_sentience_ps->audio_flash_secs > 2.0f;
 
 	if (!is_deafened_ps) {
-		::listen_for_sound_cues(ctx, step, is_ffa, is_gun_game, global_time_secs, bomb_planted);
+		::listen_for_sound_cues(ctx, step, is_ffa, is_gun_game, global_time_secs, bomb_planted, defusing_faction);
 	}
 
 	/*

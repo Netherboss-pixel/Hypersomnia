@@ -205,6 +205,7 @@ struct arena_mode_faction_rules {
 	real32 movement_speed_mult = 1.0f;
 	real32 health_mult = 1.0f;
 	bool use_bombsites_as_spawns = false;
+	faction_type spawn_at_faction_spawns = faction_type::COUNT;
 	// END GEN INTROSPECTOR
 };
 

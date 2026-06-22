@@ -278,7 +278,7 @@ inline std::optional<item_flavour_id> handle_purchases(
 		Defuse kits are useful but not critical - only buy when we have excess money.
 	*/
 
-	if (buyer_faction == faction_type::METROPOLIS) {
+	if (buyer_faction == ctx.defusing_faction) {
 		constexpr money_type DEFUSE_KIT_THRESHOLD = 10000;
 		if (money >= DEFUSE_KIT_THRESHOLD && !has_defuse_kit) {
 			if (const auto kit = try_buy_defuse_kit(money)) {

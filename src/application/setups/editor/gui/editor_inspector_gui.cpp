@@ -2667,7 +2667,6 @@ EDIT_FUNCTION(
 
 			MULTIPROPERTY("Warmup time", tri_faction.warmup_time);
 			MULTIPROPERTY("Freeze time", tri_faction.freeze_time);
-			MULTIPROPERTY("Buy time", tri_faction.buy_time);
 
 			MULTIPROPERTY("Round time", tri_faction.round_time);
 			MULTIPROPERTY("Round end time", tri_faction.round_end_time);

@@ -20,7 +20,8 @@ inline bool should_acquire_target_by_hearing(
 	const faction_type bot_faction,
 	const bool bomb_planted,
 	const bool already_acquired_by_hearing,
-	const bool is_gun_game
+	const bool is_gun_game,
+	const faction_type defusing_faction
 ) {
 	if (is_gun_game) {
 		return true;
@@ -30,7 +31,7 @@ inline bool should_acquire_target_by_hearing(
 		return false;
 	}
 
-	if (bot_faction == faction_type::METROPOLIS && bomb_planted) {
+	if (bot_faction == defusing_faction && bomb_planted) {
 		return true;
 	}
 

@@ -213,6 +213,14 @@ auto setup_ruleset_from_editor_mode(
 			}
 		}
 
+		constexpr bool is_trifaction_v = std::is_same_v<I, editor_trifaction_mode>;
+		if constexpr(is_trifaction_v) {
+			rules.bomb_flavour = {};
+			rules.allow_spawn_for_secs_after_starting = static_cast<uint32_t>(-1);
+			rules.factions[faction_type::RESISTANCE].use_bombsites_as_spawns = true;
+			rules.factions[faction_type::ATLANTIS].spawn_at_faction_spawns = faction_type::RESISTANCE;
+		}
+
 		rules.subrules = subrules;
 		apply_playtesting_overrides(rules);
 		result = rules;

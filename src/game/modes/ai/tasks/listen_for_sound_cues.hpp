@@ -23,7 +23,8 @@ inline void listen_for_sound_cues(
 	const bool is_ffa,
 	const bool is_gun_game,
 	const real32 global_time_secs,
-	const bool bomb_planted
+	const bool bomb_planted,
+	const faction_type defusing_faction
 ) {
 	const auto& sound_cues = step.get_queue<messages::sound_cue_message>();
 	const auto bot_faction = ctx.character_handle.get_official_faction();
@@ -94,7 +95,8 @@ inline void listen_for_sound_cues(
 			bot_faction,
 			bomb_planted,
 			ctx.ai_state.has_acquired_target_by_hearing_during_bomb_plant,
-			is_gun_game
+			is_gun_game,
+			defusing_faction
 		)) {
 			ctx.ai_state.alertness.queue_alert({
 				cue.source_entity,

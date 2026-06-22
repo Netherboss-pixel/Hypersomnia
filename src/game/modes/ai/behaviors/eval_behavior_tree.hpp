@@ -121,7 +121,7 @@ inline ai_behavior_variant eval_behavior_tree(
 	/*
 		Clear bomb retrieval mission if bomb is secured.
 	*/
-	if (is_resistance && team_state.bot_with_bomb_retrieval_mission == controlled_character_id) {
+	if (is_bombing_team && team_state.bot_with_bomb_retrieval_mission == controlled_character_id) {
 		if (!round_state.bomb_entity.is_set()) {
 			team_state.bot_with_bomb_retrieval_mission = entity_id::dead();
 		}
@@ -131,7 +131,7 @@ inline ai_behavior_variant eval_behavior_tree(
 			if (bomb_handle.alive()) {
 				const auto bomb_owner = bomb_handle.get_owning_transfer_capability();
 				const bool bomb_secured = bomb_owner.alive() && 
-					bomb_owner.get_official_faction() == faction_type::RESISTANCE;
+					bomb_owner.get_official_faction() == round_state.bombing_faction;
 
 				if (bomb_secured) {
 					team_state.bot_with_bomb_retrieval_mission = entity_id::dead();
@@ -146,7 +146,7 @@ inline ai_behavior_variant eval_behavior_tree(
 		If the bot has the bomb in inventory and has already completed the push waypoint
 		(or skipped it), then planting takes priority before combat.
 	*/
-	if (!round_state.bomb_planted && is_resistance && ai_state.push_phase == push_phase_type::COMPLETED) {
+	if (!round_state.bomb_planted && is_bombing_team && ai_state.push_phase == push_phase_type::COMPLETED) {
 		if (round_state.bomb_entity.is_set()) {
 			const auto bomb_handle = cosm[round_state.bomb_entity];
 
@@ -179,7 +179,7 @@ inline ai_behavior_variant eval_behavior_tree(
 			*/
 			bool is_bomb_carrier = false;
 
-			if (is_resistance && round_state.bomb_entity.is_set()) {
+			if (is_bombing_team && round_state.bomb_entity.is_set()) {
 				const auto bomb_handle = cosm[round_state.bomb_entity];
 
 				if (bomb_handle.alive()) {
@@ -189,7 +189,7 @@ inline ai_behavior_variant eval_behavior_tree(
 
 			entity_id push_wp;
 
-			if (is_resistance) {
+			if (is_bombing_team) {
 				/*
 					Resistance non-carriers always push.
 					Bomb carrier pushes with 80% probability.
@@ -200,9 +200,9 @@ inline ai_behavior_variant eval_behavior_tree(
 					push_wp = ::find_random_unassigned_push_waypoint(cosm, team_state, rng);
 				}
 			}
-			else if (is_metropolis) {
+			else if (is_defusing_team) {
 				/*
-					Metropolis: 20% chance to choose push waypoint.
+					Defusing team: 20% chance to choose push waypoint.
 				*/
 				const bool choose_push = rng.randval(0, 99) < 20;
 
@@ -238,7 +238,7 @@ inline ai_behavior_variant eval_behavior_tree(
 			}
 		}
 
-		if (is_resistance && round_state.bomb_planted) {
+		if (is_bombing_team && round_state.bomb_planted) {
 			AI_LOG(
 				"eval_behavior_tree: PATROL (faction=%x, bomb_planted=%x, patrol_letter=%x, push_phase=%x, push_wp_set=%x)",
 				static_cast<int>(bot_faction), round_state.bomb_planted,
