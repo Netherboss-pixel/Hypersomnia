@@ -46,6 +46,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=%HYPERSOMNIA_BUILD_TYPE% ^
           -DOUTPUT_TO_HYPERSOMNIA_FOLDER=1 ^
           -DOPENSSL_ROOT_DIR="C:\Program Files\OpenSSL" ^
+          -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ^
           ..
       shell: cmd
 
@@ -75,15 +76,23 @@ jobs:
         mkdir "${{ github.workspace }}\tools\deps"
       shell: cmd
 
-    - name: Setup Ninja
+    - name: Build
       run: |
-        cd "${{ github.workspace }}\tools\deps"
-        $ninjaUrl = "https://github.com/ninja-build/ninja/releases/download/v1.9.0/ninja-win.zip"
-        Invoke-WebRequest -Uri $ninjaUrl -OutFile ninja.zip
-        7z x ninja.zip -o"${{ github.workspace }}\tools\deps\ninja" | Out-Null
-        echo "${{ github.workspace }}\tools\deps\ninja" >> $env:GITHUB_PATH
-        ninja --version
-      shell: pwsh
+        for /f "delims=" %%i in ('"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath') do set "VS_PATH=%%i"
+        call "%VS_PATH%\VC\Auxiliary\Build\vcvarsall.bat" x64
+        cd cmake\steam_integration
+        mkdir build
+        cd build
+        cmake -DBUILD_STEAM=0 -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+        ninja install
+        cd ..\..\..\
+        dir
+        mkdir build
+        cd build
+        dir
+        cmake -G Ninja -DLINK_STEAM_INTEGRATION=1 -DCMAKE_C_COMPILER="C:\Program Files\LLVM\bin\clang-cl.exe" -DCMAKE_CXX_COMPILER="C:\Program Files\LLVM\bin\clang-cl.exe" -DCMAKE_LINKER="C:\Program Files\LLVM\bin\lld-link.exe" -DARCHITECTURE="x64" -DCMAKE_BUILD_TYPE=%HYPERSOMNIA_BUILD_TYPE% -DOUTPUT_TO_HYPERSOMNIA_FOLDER=1 -DOPENSSL_ROOT_DIR="C:\Program Files\OpenSSL" -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ..
+        ninja
+      shell: cmd
 
     - name: Build
       run: |
